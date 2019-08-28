@@ -1,7 +1,6 @@
 import React from 'react'
 
 import _ from 'lodash'
-import axios from 'axios'
 
 import { Form } from 'react-powerplug'
 import { compose, withHandlers, withState } from 'recompose'
@@ -18,12 +17,19 @@ const enhance = compose(
   withState('error', 'setError', null),
   withHandlers({
     doLogin: ({ onAuthorized = _.noop, setError }) => async (fields) => {
-      const response = await axios.post('/api/auth/login', fields)
-        .catch((err) => {
-          console.error(err)
-          setError(err)
-        })
-      const jwt = _.get(response, 'data.jwt', null)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(fields)
+      }).catch((err) => {
+        console.error(err)
+        setError(err)
+      })
+      const json = await response.json()
+      const jwt = json.jwt || null
       if (!jwt) return
       window.localStorage.setItem(JWT_KEY, jwt)
       onAuthorized(jwt)

@@ -2,8 +2,6 @@ import React from 'react'
 
 import _ from 'lodash'
 
-import axios from 'axios'
-
 import {
   compose,
   withStateHandlers,
@@ -73,13 +71,14 @@ const enhance = compose(
 
       if (!jwt) return
 
-      const response = await axios.get('/api/users/me', {
+      const response = await fetch('/api/users/me', {
+        mode: 'cors',
         headers: {
           Authorization: `bearer ${jwt}`
         }
       }).catch((err) => console.error(err))
 
-      const profile = _.get(response, 'data')
+      const profile = await response.json()
 
       setProfile(profile)
     }
